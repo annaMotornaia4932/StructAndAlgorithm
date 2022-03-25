@@ -1,0 +1,152 @@
+// Приложение сортировки Quick Sort
+// Поиск элемента либо по его порядковой позиции, либо по его содержимому; 
+// Добавление/удаление элемента с последующей пересортировкой последовательности;
+// C++
+
+//  main.cpp
+//  struct-5.Motornaia.4932
+//
+//  Created by Анна Моторная on 11.11.2020.
+//  Copyright © 2020 Анна Моторная. All rights reserved.
+//
+
+#include <iostream>
+#include <math.h>
+
+using namespace std;
+
+int *quickSort(int *array, int f, int l, int countInterations, int countExchanges,int *count, int counts[2])
+{
+    count=&counts[0];
+    int first=f;
+    int last = l;
+    int middle = array[(first + last) / 2];
+    int temp;
+
+    while (first <= last)
+    {
+        while (array[first] < middle)
+            first++;
+        countInterations++;
+        while (array[last] > middle)
+            last--;
+        countInterations++;
+        if (first <= last)
+        {
+            temp = array[first];
+            array[first] = array[last];
+            array[last] = temp;
+            first++;
+            countInterations++;
+            last--;
+            countInterations++;
+            countExchanges++;
+        }
+    }
+    if (last > f)
+    {quickSort(array, f, last,countInterations, countExchanges, count, counts);}
+    if (first < l)
+    {quickSort(array, first, l,countInterations, countExchanges, count, counts);}
+    counts[0]=countInterations;
+    counts[1]=countExchanges;
+    count=&counts[0];
+    return count;
+}
+void checkSameElements( int *array, int n)
+{
+    int count=0;
+    for (int i=0;i<n;i++)
+    {
+        for(int j=i+1;j<n;j++)
+        {
+            if (array[i]==array[j])
+            {
+                do {
+                    j++;}while (array[i]==array[j]);
+            i=j-1;
+            count++;}
+    }
+    }
+    cout<<"Повторяющихся элементов: "<<count<<endl;
+}
+
+int checkN ( unsigned int i)
+{
+    if (cin.fail())
+    {
+        cin.fail();
+        cin.clear();
+          cin.ignore(32767, '\n');
+          cin.ignore(cin.rdbuf()->in_avail(), '\n');
+        cout<<"error "<<endl;
+        return 0;
+    }
+    return i;
+}
+void printMassiv(int *massiv, int n)
+{
+    for (int i=0;i<n;i++){
+        printf("%0d ",massiv[i]);
+    }
+    cout<<endl;
+}
+void deleteElement(int *massiv, int n, int k)
+{
+    for(int i=k;i<n;i++)
+      {
+          massiv[i]=massiv[i+1];
+      }
+}
+void addElement(int *massiv,int n,int k,int data)
+{
+    for(int i=n;i>k;i--)
+         {
+             massiv[i]=massiv[i-1];}
+    massiv[k]=data;
+}
+
+int main()
+{
+setlocale (LC_ALL,"rus");
+srand((unsigned)time(NULL));
+    
+    unsigned int n;
+    cout<<"Введите количество элементов массива: "<<endl;
+    cin>>n;
+    checkN(n);
+    int massiv[n];
+    for (int i = 0; i<n; i++){massiv[i]=-10+rand()%99;}
+    printMassiv(massiv,n);
+    int countInterations=0;
+    int countExchanges =0;
+    int counts[2];
+    int *count=&counts[0];
+    quickSort(massiv,0,n,countInterations, countExchanges, count, counts);
+    cout<<"Отсортированный массив :"<<endl;
+    printMassiv(massiv, n);
+    checkSameElements(massiv,n);
+    cout<<"Интераций: "<<counts[0]<<" Перестановок: "<<counts[1]<<endl;
+    unsigned int k;
+    cout<<"Удалить элемент номер: "<<endl;
+    cin>>k;
+    checkN(k);
+    deleteElement(massiv,n,k);
+    n=n-1;
+    printMassiv(massiv, n);
+    cout<<"Добавить элемент на позицию № "<<endl;
+    cin>>k;
+    cout<<"Введите элемент: "<<endl;
+    int data;
+    cin>>data;
+    checkN(data);
+    n=n+1;
+    addElement(massiv,n,k,data);
+    printMassiv(massiv, n);
+    quickSort(massiv,0,n,countInterations, countExchanges, count, counts);
+    cout<<"Отсортированный массив :"<<endl;
+    printMassiv(massiv, n);
+    checkSameElements(massiv,n);
+    cout<<"Интераций: "<<counts[0]<<" Перестановок: "<<counts[1]<<endl;
+    return 0;
+}
+}
