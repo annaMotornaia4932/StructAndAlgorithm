@@ -1,0 +1,559 @@
+// Дерево АВЛ. Добавление, изменение, удаление элементов, обзор дерева, балансировка,
+// цикличное удаление каждого нечетного узла с прямым обходом
+// С++
+//
+//  main.cpp
+//  struct-6.Motornaia.4932
+//
+//  Created by Анна Моторная on 12.11.2020.
+//  Copyright © 2020 Анна Моторная. All rights reserved.
+//
+
+#include <iostream>
+#include <math.h>
+#include <string>
+
+using namespace std;
+
+struct treeElement
+{
+    int data;
+    treeElement *left=NULL;
+    treeElement *right=NULL;
+    unsigned int height=1;
+    unsigned int level = 0;
+};
+
+unsigned int heightNode(struct treeElement*root){
+    int lh=0,rh=0;
+    if(root)
+    {
+    if(!root->left){lh=0;}
+    else{lh=root->left->height;}
+   if(!root->right){rh=0;}
+   else{rh=root->right->height;}
+        if (rh>lh){return rh;}
+    }
+    return lh;
+}
+
+int balanceFactor (struct treeElement*root){
+    int BF=0;
+    if (root){
+        BF=heightNode(root->left)-heightNode(root->right);
+        return BF;
+    }
+    return 0;
+}
+
+int changeHeight(struct treeElement*root){
+    if (root){
+        root->height=max(changeHeight(root->right),changeHeight(root->left))+1;
+    return root->height;
+    }
+    return 0;
+}
+
+
+void niceViewTree (treeElement *root, int depth, treeElement *mainRoot)
+{
+  if (root!=NULL)
+  {
+    changeHeight(root);
+    niceViewTree(root->right, depth + 1, mainRoot);
+    for (int i = 0; i < depth; i++){cout <<"   ";}
+    cout<<root->data<<"-"<<root->height<<endl;
+    niceViewTree(root->left, depth + 1,mainRoot);
+}
+}
+
+//
+treeElement * llrotation(treeElement *mainRoot){
+    treeElement *newMainRoot;
+    newMainRoot = mainRoot->left;
+
+    mainRoot->left = newMainRoot->right;
+    newMainRoot->right = mainRoot;
+    
+    return newMainRoot;
+}
+
+
+treeElement * rrrotation(treeElement *mainRoot){
+    treeElement *newMainRoot;
+    newMainRoot = mainRoot->right;
+
+    mainRoot->right = newMainRoot->left;
+    newMainRoot->left = mainRoot;
+    
+    return newMainRoot;
+}
+
+
+treeElement * rlrotation(treeElement *mainRoot){
+    treeElement *root;
+    treeElement *rootRight;
+    treeElement *rootRightLeft;
+    
+    root = mainRoot;
+    rootRight = root->right;
+    rootRightLeft =root->right->left;
+
+    root -> right = rootRightLeft->left;
+    rootRight ->left = rootRightLeft->right;
+    rootRightLeft ->left = root;
+    rootRightLeft->right = rootRight;
+    
+    return rootRightLeft;
+}
+
+treeElement * lrrotation(treeElement *mainRoot){
+     treeElement *root;
+     treeElement *rootLeft;
+     treeElement *rootLeftRight;
+    
+    root = mainRoot;
+    rootLeft = root->left;
+    rootLeftRight =root->left->right;
+
+    root -> left = rootLeftRight->right;
+    rootLeft ->right = rootLeftRight->left;
+    rootLeftRight ->right = root;
+    rootLeftRight->left = rootLeft;
+    
+    return rootLeftRight;
+}
+
+treeElement * balanceTree(treeElement *r, treeElement *parent){
+   
+    int depth =0;
+    if(r){
+        if(balanceFactor(r)==2 && balanceFactor(r->left)==1)
+        {
+            cout<<"-вершину-"<<r->data<<endl;
+            r=llrotation(r);
+            cout<<"-левый поворот, новая вершина -" <<r->data<<endl;
+            
+            if(parent->data > r->data){parent->left=r;}
+            else {parent->right=r;}
+            
+            cout<<"поворот: "<<endl<<"======================="<<endl;
+            niceViewTree(r, depth, r);
+            cout<<"========================="<<endl;
+        }
+        else if (balanceFactor(r)==-2 && balanceFactor(r->right)==-1)
+        {
+            cout<<"-вершину-"<<r->data<<endl;
+            r=rrrotation(r);
+            cout<<"-правый поворот, новая вершина -"<<r->data<<endl;
+            
+            if(parent->data > r->data){parent->left=r;}
+            else {parent->right=r;}
+            
+            cout<<"поворот: "<<endl<<"======================="<<endl;
+            niceViewTree(r, depth, r);
+            cout<<"========================="<<endl;
+        }
+        else if (balanceFactor(r)==-2 && balanceFactor(r->right)==1)
+        {
+            cout<<"-вершину-"<<r->data<<endl;
+            r=rlrotation(r);
+            cout<<"-право-левый поворот, новая вершина -"<<r->data<<endl;
+            
+            if(parent->data > r->data){parent->left=r;}
+            else {parent->right=r;}
+            
+            cout<<"поворот: "<<endl<<"======================="<<endl;
+            niceViewTree(r, depth, r);
+            cout<<"========================="<<endl;
+        }
+        else if (balanceFactor(r)==2 && balanceFactor(r->left)==-1)
+        {
+            cout<<"-вершину-"<<r->data<<endl;
+            r=lrrotation(r);
+            cout<<"-лево-правый поворот,новая вершина -"<<r->data<<endl;
+            
+            if(parent->data > r->data){parent->left=r;}
+            else {parent->right=r;}
+            
+            cout<<"поворот: "<<endl<<"======================="<<endl;
+            niceViewTree(r, depth, r);
+            cout<<"========================="<<endl;
+    }
+balanceTree(r->right,r);
+balanceTree(r->left,r);
+        
+    }
+    return r;
+    }
+//
+
+
+void addElementInTree (struct treeElement *root, int newData, struct treeElement*mainRoot)
+{
+    treeElement *addMe = new treeElement;
+    treeElement *parent=root;
+    addMe->data=newData;
+    changeHeight(root);
+    
+    while (root!=NULL){
+        changeHeight(root);
+        parent=root;
+        
+        if(addMe->data<root->data){root=root->left;}
+        else if(addMe->data>root->data){ root=root->right;}
+        else{return;}
+    }
+        if (addMe->data<parent->data)
+        {
+            parent->left=addMe;
+            changeHeight(parent);
+        }
+        else{
+            parent->right=addMe;
+            changeHeight(parent);
+        }
+        }
+
+int middleRootShakerSort(int *massiv, int n)//середина отсортированного массива- корень дерева
+{
+    int buffer=0;
+    int left = 0;
+    int right = n-1;
+    int copyMassiv[n];
+    
+    for (int i=0;i<n;i++){copyMassiv[i]=massiv[i];}
+    
+    while(left<=right)
+    {
+        for (int j= right;j>left;j--)
+        {
+            if (copyMassiv[j-1]>copyMassiv[j])
+            {
+                buffer = copyMassiv[j];
+                copyMassiv[j]=copyMassiv[j-1];
+                copyMassiv[j-1]=buffer;
+            }
+        }
+        left+=1;
+        for (int i=left;i<right;i++)
+        {
+            if(copyMassiv[i]>copyMassiv[i+1])
+            {
+                buffer=copyMassiv[i];
+                copyMassiv[i]=copyMassiv[i+1];
+                copyMassiv[i+1]=buffer;
+            }
+        }
+        right-=1;
+    }
+    
+    return copyMassiv[n/2];
+}
+
+treeElement *deleteElement( treeElement *root, treeElement *mainRoot, int deleteMe)
+{
+    treeElement *parent=root;
+
+    while(root!=NULL)
+    {
+        if(root->data==deleteMe)
+        {
+            //1случай
+            if(root->left==NULL&&root->right==NULL)
+            {
+                if(root->data>parent->data){parent->right=NULL;}
+                else{parent->left=NULL;}
+                if (mainRoot->data==deleteMe){return root;}
+                
+                delete root;
+                cout<<"1-случай, это лист"<<endl;
+                return mainRoot;
+            }
+            
+            //2случай
+            if(root->left!=NULL&&root->right==NULL)
+            {
+                if (mainRoot->data!=deleteMe){
+                if(root->data>parent->data)
+                {
+                    parent->right=root->left;
+                    if (mainRoot->data==deleteMe){mainRoot=parent;}
+                    delete root;
+                    cout<<"2.1 случай, это родитель с левым потомком"<<endl;
+                    return mainRoot;
+                }
+                else{
+                    parent->left=root->left;
+                    if (mainRoot->data==deleteMe){mainRoot=parent;}
+                    delete root;
+                    cout<<"2.1 случай, это родитель с левым потомком"<<endl;
+                    return mainRoot;
+                }
+            }
+        }//или
+            else if(root->right!=NULL&&root->left==NULL)
+            {
+                if(root->data>parent->data)
+                {
+                    parent->right=root->right;
+                    if (mainRoot->data==deleteMe){mainRoot=parent;}
+                    delete root;
+                    cout<<"2.2 случай, это родитель с правым потомком"<<endl;
+                   return mainRoot;
+                }
+                             else{
+                                 parent->left=root->right;
+                                 if (mainRoot->data==deleteMe){mainRoot=parent;}
+                                 delete root;
+                                 cout<<"2.2 случай, это родитель с правым потомком"<<endl;
+                                 return mainRoot;
+                             }
+            }
+            //3 случай
+            else if(root->right!=NULL&&root->left!=NULL)
+            {
+                treeElement *deletMe=root;
+              
+                if(root->data>parent->data)
+                {
+                    parent->right=root->right;
+                    parent=root;
+                    root=root->right;
+                    while(root->left!=NULL){root=root->left;}
+                    root->left=deletMe->left;
+                  cout<<"3.1 случай, есть оба потомка"<<endl;
+                    return mainRoot;
+                }
+                else{
+                    if (mainRoot->data==deleteMe)
+                    {//если удаляем вершину
+                     if(changeHeight(mainRoot->left)>changeHeight(mainRoot->right))
+                        {
+                        root=mainRoot->left;
+                        
+                            while(root)
+                        {
+                            parent=root;
+                            root=root->right;
+                        }
+                        treeElement *newMainRoot = parent;
+                        deleteElement(mainRoot, mainRoot, parent->data);
+                        mainRoot->data=newMainRoot->data;
+                        balanceTree(mainRoot, nullptr);
+                        return mainRoot;
+                        }
+                        else{
+                            root=mainRoot->right;
+                                                 while(root)
+                                                 {
+                                                     parent=root;
+                                                     root=root->left;
+                                                 }
+                                                 treeElement *newMainRoot = parent;
+                                                 deleteElement(mainRoot, mainRoot, parent->data);
+                                                 mainRoot->data=newMainRoot->data;
+                                                 balanceTree(mainRoot, nullptr);
+                                                 return mainRoot;
+                        }
+                    }///////////////////
+                    
+                    parent->left=root->right;
+                    parent=root;
+                    root=root->right;
+                    while(root->left!=NULL){root=root->left;}
+                    root->left=deletMe->left;
+                  delete deletMe;
+                    cout<<"3.2 случай, есть оба потомка"<<endl;
+                    return mainRoot;}
+            }
+        }
+        //переставляем указалель
+        else if(deleteMe>=root->data){parent=root; root=root->right;}
+        else if(deleteMe<root->data){parent = root; root=root->left;}
+    }
+    cout<<endl<<"Элемент не найден"<<endl;
+    return mainRoot;
+}
+void findElement( treeElement *root, int x)
+{
+    int n=0;
+    while(root!=NULL)
+    {
+        if (root->data==x){cout<<"Найден элемент за "<<n<<" шагов"<<endl;return;}
+        if(x<root->data){root=root->left; n++;}
+        else{root=root->right;n++;}
+    }
+    cout<<"Элемент не найден"<<endl;
+}
+
+void preOrder(treeElement *root){
+    if(root!=NULL)
+    {
+        static int count=1;
+        root->level=count;
+        cout<<root->level<<" - """<<root->data<<""" ";
+        count++;
+        preOrder(root->left);
+        preOrder(root->right);
+    }
+}
+
+/*void preOrderAndDelete(treeElement *root){
+
+    if(root!=NULL){
+        if (root->level%2!=0){
+            root=deleteElement(root, root, root->data);
+            cout<<endl<<"-----------------"<<endl;
+            if(root->left==NULL&&root->right==NULL){return;}
+            preOrderAndDelete(root);
+        }
+        
+        if(root->left==NULL&&root->right==NULL){return;}
+                preOrderAndDelete(root->left);
+        
+        if(root->left==NULL&root->right==NULL){return;}
+            preOrderAndDelete(root->right);}
+}
+
+treeElement *deleteEveryOdd( treeElement *root, treeElement *mainRoot){
+    if(root->level==1||root->level==3||root->level==5||root->level==7||root->level==9){mainRoot=deleteElement(root, mainRoot, root->data);cout<<"main"<<mainRoot->data<<endl;}
+    int depth=0;
+    cout<<endl<<"-------------------------"<<endl;
+    niceViewTree(mainRoot, depth, mainRoot);
+    while(root!=NULL){
+        deleteEveryOdd(root->left, mainRoot);
+        deleteEveryOdd(root->right, mainRoot);
+    }
+    return mainRoot;
+}*/
+
+int checkVvod ( int i)
+{
+    if (cin.fail())
+    {
+        cin.fail();
+        cin.clear();
+          cin.ignore(32767, '\n');
+          cin.ignore(cin.rdbuf()->in_avail(), '\n');
+        cout<<"error "<<endl;
+        return 0;
+    }
+    return i;
+}
+
+int main()
+{
+    setlocale(LC_ALL, "rus");
+    srand((unsigned)time(NULL));
+    unsigned int n;
+    cout<<"Введите количество элементов: ";
+    cin>>n;
+    checkVvod(n);
+    int massiv[n];
+    cout<<"-------------------------------------"<<endl<<"Cгенерировано: "<<endl;
+    
+    for (int i = 0; i<n; i++)
+    {
+        massiv[i]=1+rand()%99;
+                       printf("%0d ",massiv[i]);
+    }
+    cout<<endl;
+    int middleData=middleRootShakerSort(massiv,n);
+    
+    for (int i = 0; i<n; i++)
+    {
+        if(middleData==massiv[i])
+        {
+            massiv[i]=massiv[0];
+            massiv[0]=middleData;
+            break;
+        }
+    }
+    cout<<endl;
+    treeElement root;
+    root.data=middleData;
+    int depth=0;
+    treeElement *mainRoot=&root;
+    for(int i=0; i<n;i++){addElementInTree(mainRoot, massiv[i], mainRoot);}
+    balanceTree(mainRoot, nullptr);
+    niceViewTree(mainRoot,depth,mainRoot);
+    int countMenu=1;
+    int checkElement=0;
+    while(countMenu!=6){
+        cout<<endl<<
+        "Меню:"<<endl<<
+        "1.Показать дерево"<<endl<<
+        "2.Добавить элемент"<<endl<<
+        "3.Удалить элемент"<<endl<<
+        "4.Найти элемент за N шагов. "<<endl<<
+        "5.Циклично удалять каждый нечѐтный узел дерева"<<endl<<
+        "8.Балансировка"<<endl<<
+        "6.Выход"<<endl;
+        cin>>countMenu;
+        checkVvod(countMenu);
+     treeElement *root=mainRoot;
+        
+        switch (countMenu) {
+            case 1:
+                niceViewTree(mainRoot,depth,mainRoot);
+                break;
+            case 2:
+                cout<<"Введите значение нового элемента для добавления: ";
+                cin>>checkElement;
+                checkVvod(checkElement);
+                cout<<"====="<<endl;
+                addElementInTree(mainRoot, checkElement, mainRoot);
+                balanceTree(mainRoot, nullptr);
+                niceViewTree(mainRoot,depth,mainRoot);
+                break;
+            case 3:
+                cout<<"Удалить элемент со значением: "<<endl;
+                  cin>>checkElement;
+                  checkVvod(checkElement);
+                  mainRoot=deleteElement(mainRoot, mainRoot, checkElement);
+                niceViewTree(mainRoot,depth,mainRoot);
+                break;
+            case 4:
+                cout<<"Что ищем? ";
+                cin>>checkElement;
+                checkVvod(checkElement);
+                findElement(mainRoot, checkElement);
+                break;
+            case 5:
+                cout<<"пре- Обход дерева: "<<endl;//слева-направо
+                preOrder(mainRoot);
+                cout<<endl<<"Цикличное удаление корня:"<<endl;
+                niceViewTree(mainRoot, depth, mainRoot);
+                  while(mainRoot->left && mainRoot->right)
+                  {
+                      cout<<endl;
+                    deleteElement(mainRoot, mainRoot, mainRoot->data);
+                     niceViewTree(mainRoot,depth,mainRoot);
+                    }
+                cout<<endl;
+                if(mainRoot->right==NULL){ mainRoot=mainRoot->left;}
+                                     else if(mainRoot->left==NULL){ mainRoot=mainRoot->right;}
+                 niceViewTree(mainRoot,depth,mainRoot);
+                    break;
+            case 7:
+                preOrder(root);
+                //preOrderAndDelete(mainRoot);
+            case 8:
+                if (mainRoot){
+                    cout<<"-------------------------------------"<<endl<<"<Балансировка: "<<endl;
+                    balanceTree(mainRoot, nullptr);
+                }
+                cout<<endl;
+                niceViewTree(mainRoot,depth,mainRoot);
+                break;
+            case 0:
+                return 0;
+            default:
+                break;
+        }
+    }
+    return 0;
+}
+
+
