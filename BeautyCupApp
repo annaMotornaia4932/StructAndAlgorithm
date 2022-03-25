@@ -1,0 +1,816 @@
+//
+//  main.cpp
+//Motornaia_4932
+//
+//  Created by Анна Моторная on 20.04.2021.
+//  Copyright © 2020 Анна Моторная. All rights reserved.
+//
+
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#ifdef _DEBUG
+#ifndef DBG_NEW
+#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+#define newDBG_NEW
+#endif
+#endif
+
+#include <iostream>
+#include <ctime>
+#include <time.h>
+#include <cmath>
+#include <iomanip>
+#include <cstdlib>
+#include <fstream>
+#include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
+
+
+
+using namespace std;
+
+struct Girl
+{
+    char *name;
+    char *lastName;
+    int age;
+    char *ageYears;
+    unsigned int numberInCatalogue=0;
+    Girl *next=NULL;
+};
+struct Catalogue
+{
+    Girl *data=NULL;
+};
+
+//очистка буффера
+void clearBuffer()
+{
+    cin.clear();
+             cin.ignore(32767, '\n');
+             cin.ignore(cin.rdbuf()->in_avail(), '\n');;
+}
+
+//проверка на число инт
+bool isCorrectNumber ( int i)
+{
+   if(cin.fail()){
+        cin.fail();
+        cin.clear();
+          cin.ignore(32767, '\n');
+          cin.ignore(cin.rdbuf()->in_avail(), '\n');
+       return false;
+    }
+    return true;
+}
+
+//проверка на корректный русский символ
+bool isCorrectChar ( char x)
+{
+    
+    char goodSymbol[]="-, ,1,2,3,4,5,6,7,8,9,0,а, б, в, г, д, е, ё, ж, з, и, й, к, л, м, н, о, п, р, с, т, у, ф, х, ц, ч, ш, щ, ъ, ы, ь, э, ю, я, А, Б, В, Г, Д, Е, Ё, Ж, З, И, Й, К, Л, М, Н, О, П, Р, С, Т, У, Ф, Х, Ц, Ч, Ш, Щ, Ъ, Ы, Ь, Э, Ю, Я";
+    for (int i=0;i<sizeof(goodSymbol);i++){
+        if (x==goodSymbol[i]){
+            return true;
+        }
+    }
+    cin.fail();
+         cin.ignore(32767, '\n');
+         cin.ignore(cin.rdbuf()->in_avail(), '\n');
+    return false;
+}
+
+struct Girl * AddElem(struct Catalogue *list) {
+    
+    clearBuffer();
+    
+    Girl *newData = new Girl;
+    cout<<"Введите имя: "<<endl;
+    char *text=new char[255];
+    cin.getline(text,255);
+    for(int i=0;i<sizeof(text);i++){
+        while (!isCorrectChar(text[i])){
+       cout<<"Недопустимый символ. Введите снова: "<<endl;
+       cin.getline(text,255);
+            i=0;
+        }
+    }
+    char *newText=new char[strlen(text)+1];
+    strcpy(newText,text);
+    delete [] text;
+    newData->name=newText;
+    
+    cout<<"Введите фамилию: "<<endl;
+    
+     char *text2=new char[255];
+       cin.getline(text2,255);
+    for(int i=0;i<sizeof(text2);i++){
+     while (!isCorrectChar(text2[i])){
+    cout<<"Недопустимый символ. Введите фамилию: "<<endl;
+    cin.getline(text2,255);
+         i=0;
+     }
+    }
+       char *newText2=new char[strlen(text2)+1];
+       strcpy(newText2,text2);
+       delete [] text2;
+    newData->lastName=newText2;
+    
+    cout<<"Введите возраст: "<<endl;
+        cin>>newData->age;
+        while (!isCorrectNumber(newData->age))
+        {
+            cout<<"Недопустимый символ. Повторите: "<<endl;
+            cin>>newData->age;
+        }
+    int countPosition=1;
+    Girl *first=NULL;
+    Girl *parent=NULL;
+    
+    if(list->data==NULL){
+        list->data=newData;
+        list->data->numberInCatalogue=countPosition;
+    }
+    else{
+        first=list->data;
+        
+        while (first){
+            countPosition++;
+            parent=first;
+        first=first->next;
+    }
+        parent->next=newData;
+        newData->numberInCatalogue=countPosition;
+    }
+    cout<<"Участница "<<newData->name<<" "<<newData->lastName<<" добавлена в каталог под №"<<newData->numberInCatalogue<<"."<<endl;
+    return list->data;
+}
+
+void showCatalogue (struct Girl *first)
+{
+    if (first){
+    Girl *temp=first;
+    /* Вывод таблицы */
+    /* вывод заголовков */
+    printf("|----------------------------------------------|\n");
+    printf("|               КАТАЛОГ КОНКУРСАНТОК           |\n");
+    printf("|----------------------------------------------|\n");
+    printf("%-25s%-20s%-10s%-10s\n", "Имя", "Фамилия", "Возраст  ", "№");
+    printf("|----------------------------------------------|\n");
+        
+        while(temp){
+            /* вывод строк фактических данных */
+               printf("%-25s%-20s%-10.2d%-10.2d\n", temp->name, temp->lastName, temp->age, temp->numberInCatalogue);
+        temp=temp->next;
+    }
+    printf("|----------------------------------------------|\n");
+    printf("|                    -----                     |\n");
+    printf("|----------------------------------------------|\n");
+    }
+    else{
+        /* вывод примечаний */
+    printf("|----------------------------------------------------|\n");
+    printf("|                     Каталог пуст                   |\n");
+    printf("|----------------------------------------------------|\n");
+    }
+}
+
+//изменить порядковый номер в каталоге
+void changeNumberInCatalogue (struct Girl *first){
+    Girl *temp=first;
+    unsigned int count=1;
+    while(temp){
+        temp->numberInCatalogue=count;
+        count++;
+        temp=temp->next;
+    }
+}
+
+//проверка на совпадение имен
+bool isEqueNames (char *data, char *newData){
+    if (strlen(newData)!=strlen(data)){return false;}
+           else{
+               for(int i=0; i<strlen(newData); i++){
+                   if (newData[i]!=data[i]){return false;}
+               }
+           }
+    return true;
+}
+
+//поиск по имени
+struct Girl *findElemByName( struct Girl *first) {
+    clearBuffer();
+Girl *temp = first;
+    cout<<"Введите имя: "<<endl;
+     char *name=new char[255];
+          cin.getline(name,255);
+          char *newData=new char[strlen(name)+1];
+          strcpy(newData,name);
+          delete [] name;
+       
+    while (temp){
+        if (isEqueNames(temp->name, newData)==true){
+      cout<<"№ "<<temp->numberInCatalogue<<" "<<temp->lastName<<endl;
+            return temp;
+        }
+        else
+        {
+            if(temp==NULL){cout<<" 0 "<<endl;}
+        temp=temp->next;
+    }
+    }
+    delete[]newData;
+    return temp;
+    }
+
+//поиск по фамилии
+struct Girl *findElemByLastName( struct Girl *first) {
+    clearBuffer();
+Girl *temp = first;
+   cout<<"Введите фамилию: "<<endl;
+    
+     char *name=new char[255];
+          cin.getline(name,255);
+          char *newData=new char[strlen(name)+1];
+          strcpy(newData,name);
+          delete [] name;
+    cout<<"Найдено: "<<endl;
+    while (temp){
+        if (isEqueNames(temp->lastName, newData)==true){
+        cout<<"№ "<<temp->numberInCatalogue<<" Имя: "<<temp->name<<endl;
+            return temp;
+        }
+        else{
+            if(temp->next==NULL){cout<<" 0 "<<endl;}
+                temp=temp->next;
+            }
+    }
+    delete[]newData;
+    return temp;
+    }
+
+//сохранить в файл
+void saveInFile(struct Girl *first){
+    Girl *temp=first;
+   ofstream file;
+   file.open("/Users/annamotornaa/Desktop/Doc1.txt");
+    while(temp){
+        file<<temp->name<<" "<<temp->lastName<<" "<<temp->age<<" "<<temp->numberInCatalogue<<endl;
+    temp=temp->next;
+    }
+    file.close();
+}
+void clearCatalogue(struct Girl *first, struct Catalogue *catalog)//удаление каталога
+{
+    Girl *temp=first;
+    while(temp)
+    {
+        Girl *delet=temp;
+            temp=temp->next;
+        delete delet;
+        catalog->data = temp;
+        }
+    first=temp;
+}
+//загрузить из  файла
+
+Girl *downloadFromFile(struct Girl *first,struct Catalogue *list)
+{
+clearCatalogue(first, list);
+   ifstream file;
+  
+    Girl *parent=NULL;
+                
+    file.open("/Users/annamotornaa/Desktop/Doc1 2.txt");
+    if (file.is_open())
+    {
+        while(file){
+            if(file.eof()){break;}
+            Girl *temp=new Girl;
+            temp->name=new char[256];
+            file.getline(temp->name,255,' ');
+            if(!isCorrectChar(temp->name[1])){
+                return list->data;
+            }
+            temp->lastName=new char [256];
+            file.getline(temp->lastName,255,' ');
+            file>>temp->age;
+            file>>temp->numberInCatalogue;
+                if(list->data==NULL){
+                    list->data=temp;
+                    parent = temp;
+                }
+                else{
+                    parent->next=temp;
+                    parent=temp;
+                    temp->next=nullptr;
+                }
+            if(file.eof()){
+                file.close();
+                showCatalogue(list->data);
+                return list->data;
+                
+            }
+    }
+    }
+    file.close();
+    showCatalogue(list->data);
+    return list->data;
+}
+void registrationOfEntrance (){
+    ofstream file;
+    file.open("/Users/annamotornaa/Desktop/DocRegistration.txt", ios::app);
+   time_t t= time(0);
+    tm* now = localtime(&t);
+    file<<endl<<"Вход выполнен: "<<endl;
+    file<<(now->tm_year+1900)
+    <<'-'
+    <<(now->tm_mon+1)
+    <<'-'
+    <<(now->tm_mday)
+    <<' '
+    <<(now->tm_hour)
+    <<':'
+    <<(now->tm_min)
+    <<endl;
+    file.close();
+}
+//поиск по возрасту
+struct Girl *findElemByAge( struct Girl *first) {
+    clearBuffer();
+    Girl *temp = first;
+    int ageNumber;
+    cout<<"Введите возраст: "<<endl;
+    cin>>ageNumber;
+    while(!isCorrectNumber(ageNumber)){
+                   cout<<"Недопустимый символ. Повторите: Новая стоимость(руб): "<<endl;
+                   cin>>ageNumber;
+               }
+    cout<<"Найдено: "<<endl;
+    while (temp){
+        if (ageNumber==temp->age){
+        cout<<"№ "<<temp->numberInCatalogue<<" имя: "<<temp->name<<" фамилия: "<<temp->lastName<<endl;
+            return temp;
+        }
+        else{
+            if(temp->next==NULL){cout<<" 0 "<<endl;}
+                temp=temp->next;
+            }
+    }
+    return temp;
+    }
+
+//поиск по номеру
+struct Girl *findElemByNumberInCatalogue( struct Girl *first) {
+clearBuffer();
+Girl *temp = first;
+    int number=0;
+cout<<"Введите номер в каталоге: "<<endl;
+cin>>number;
+    while (!isCorrectNumber(number)){
+        cin.clear();
+        clearBuffer();
+        cout<<"Введите номер в каталоге: "<<endl;
+        cin>>number;
+    }
+cout<<"Найдено: "<<endl;
+while (temp){
+    if (number==temp->numberInCatalogue){
+    cout<<"№ "<<temp->numberInCatalogue<<" имя: "<<temp->name<<" фамилия: "<<temp->lastName<<endl;
+        return temp;
+    }
+    else{
+        if(temp->next==NULL){cout<<" 0 "<<endl;}
+            temp=temp->next;
+        }
+}
+return temp;
+}
+
+//удалить участицу
+struct Girl* deleteGirl( struct Girl *first, struct Catalogue *catalog) {
+    Girl *temp=first;
+    int t=0;
+    cout<<endl<<"1 - удалить по имени"<<endl<<"2 - найти по фамилии "<<endl<<"3 - найти по возрасту "<<endl<<"4 - выход "<<endl;
+        cin>>t;
+        
+    switch (t) {
+        case 1:
+                temp=findElemByName(catalog->data);
+                if(temp==first){
+                    catalog->data=temp->next;
+                    delete [] temp;
+                    cout<<"Участник удален"<<endl;
+                    changeNumberInCatalogue(catalog->data);
+                    return catalog->data;
+                }
+                else{
+                    if(temp->next==NULL){
+                        delete [] temp->next;
+                        temp=NULL;
+                    cout<<"Участник удален"<<endl;
+                        changeNumberInCatalogue(catalog->data);
+                    return catalog->data;
+                    }
+                    else {
+                        Girl *parent = temp->next--;
+                        parent->next=temp->next;
+                        delete [] temp;
+                          cout<<"Участник удален"<<endl;
+                        changeNumberInCatalogue(catalog->data);
+                        return catalog->data;
+                    }
+            }
+            break;
+        case 2:
+                temp=findElemByLastName(catalog->data);
+                if(temp==first){
+                    catalog->data=temp->next;
+                    delete[] temp;
+                    cout<<"Участник удален"<<endl;
+                    changeNumberInCatalogue(catalog->data);
+                    return catalog->data;
+                }
+                else{
+                    if(temp->next==NULL){
+                        delete []temp;
+                    cout<<"Участник удален"<<endl;
+                        changeNumberInCatalogue(catalog->data);
+                    return catalog->data;
+                    }
+                    else {
+                        Girl *parent = temp--;
+                        parent->next=temp->next;
+                        delete []temp;
+                          cout<<"Участник удален"<<endl;
+                        changeNumberInCatalogue(catalog->data);
+                        return catalog->data;
+                    }
+            }
+            break;
+        case 3:
+                      temp=findElemByAge(catalog->data);
+            break;
+            
+        default:
+            break;
+    }
+    return catalog->data;
+        }
+
+
+
+void changeData(struct Girl *first){
+
+    int menu=0;
+ 
+    Girl *temp=findElemByNumberInCatalogue(first);
+    while (menu>=0&&menu<=3){
+        cout<<"Выберете: "<<endl<<"1 - изменить имя"<<endl<<"2 - изменить фамилию"<<endl<<"3 - изменить возраст"<<endl<<"4 - выход"<<endl;
+        cin>>menu;
+    if(!cin.fail()&&temp!=NULL){
+    switch (menu) {
+            
+        case 1: {
+             cout<<"Введите имя: "<<endl;
+               char *text=new char[255];
+            clearBuffer();
+               cin.getline(text,255);
+            for(int i=0;i<sizeof(text);i++){
+                     while (!isCorrectChar(text[i])){
+                         cin.clear();
+                         clearBuffer();
+                    cout<<"Недопустимый символ. Введите: "<<endl;
+                    cin.getline(text,255);
+                     }
+                    }
+               char *newText=new char[strlen(text)+1];
+               strcpy(newText,text);
+               delete [] text;
+               temp->name=newText;
+            delete[]newText;
+            break;
+        }
+        case 2: {
+           clearBuffer();
+            cout<<"Введите фамилию: "<<endl;
+                    char *text2=new char[255];
+                    cin.getline(text2,255);
+            for(int i=0;i<sizeof(text2);i++){
+             while (!isCorrectChar(text2[i])){
+                  cin.clear();
+                 clearBuffer();
+            cout<<"Недопустимый символ. Введите: "<<endl;
+            cin.getline(text2,255);
+             }
+            }
+                    char *newText2=new char[strlen(text2)+1];
+                    strcpy(newText2,text2);
+                    delete [] text2;
+                    temp->lastName=newText2;
+            delete[]newText2;
+            break;
+    }
+        case 3: {
+      cout<<"Возраст: "<<endl;
+            int ageNew=0;
+            cin>>ageNew;
+            while(!isCorrectNumber(ageNew)){
+                cin.clear();
+                clearBuffer();
+                cout<<"Недопустимый символ. Повторите: Новая стоимость(руб): "<<endl;
+                cin>>ageNew;
+            }
+            temp->age=ageNew;
+              break;
+        }
+            
+        default:
+            break;
+    }
+    }
+    else {cout<<"error"<<endl; return;}
+    }
+}
+int count ( struct Girl *q)//счетчик количества элементов
+{
+    int n=0;
+    Girl *temp=q;
+    while(temp)
+        {
+            n++;
+            temp=temp->next;
+        }
+    return n;
+}
+
+Girl *randWinner (struct Girl *first)//функция генерации случайного победителя конкурса
+{
+    Girl *winner=first;
+    int num = rand() % count(first);
+    for (int i=0;i<num;i++){
+        winner=winner->next;
+    }
+    return winner;
+}
+
+bool firstMoreThenSecond(char *first, char *second, struct Catalogue *data)
+{
+  char alfabet[]="а, б, в, г, д, е, ё, ж, з, и, й, к, л, м, н, о, п, р, с, т, у, ф, х, ц, ч, ш, щ, ъ, ы, ь, э, ю, я, А, Б, В, Г, Д, Е, Ё, Ж, З, И, Й, К, Л, М, Н, О, П, Р, С, Т, У, Ф, Х, Ц, Ч, Ш, Щ, Ъ, Ы, Ь, Э, Ю, Я";
+    int position=0;
+  for (int i=0;i<sizeof(first)-1;i++){
+      for(int j=0;j<sizeof(alfabet);j++){
+      if (first[i]==alfabet[j]){
+          position = j;
+          for (int l=position+1;l<sizeof(alfabet)-1;l++){
+              if(second[i]){
+        if  (second[i]==alfabet[l])  {return false;}
+          }
+          }
+      }
+  }
+  }
+    return true;
+}
+
+
+///cортировка по возрасту
+ struct Catalogue *sortByAge (struct Girl *first, struct Catalogue *data){
+
+    Girl *temp=first;
+     int size =count(data->data);
+     Girl **massiv = new Girl*[size-1];
+     
+     for (int i=0;i<size;i++)
+     {
+         massiv[i]=temp;
+         temp=temp->next;
+     }
+     
+     Girl *buffer;
+    for (int i=0;i<size-1;i++)
+         {
+             for (int j =i+1; j<size;j++){
+                 if (massiv[j]->age<massiv[i]->age){
+                     buffer = massiv[i];
+                     massiv[i]=massiv[j];
+                     massiv[j]=buffer;
+                 }
+             }
+         }
+     for (int i=0;i<size;i++)
+        {
+            if(massiv[i+1]){
+            massiv[i]->next=massiv[i+1];
+            }
+            else {
+                massiv[i]->next=NULL;
+            }
+        }
+     data->data=massiv[0];
+     delete [] massiv;
+     return data;
+}
+
+ struct Catalogue *sortByLastName (struct Girl *first, struct Catalogue *data){
+
+    Girl *temp=first;
+     int size =count(data->data);
+     Girl **massiv = new Girl*[size-1];
+     
+     for (int i=0;i<size;i++)
+     {
+         massiv[i]=temp;
+         temp=temp->next;
+     }
+     
+     Girl *buffer;
+    for (int i=0;i<size-1;i++)
+         {
+             for (int j =i+1; j<size;j++){
+                 if (firstMoreThenSecond(massiv[i]->lastName, massiv[j]->lastName, data)==true){
+                     buffer = massiv[i];
+                     massiv[i]=massiv[j];
+                     massiv[j]=buffer;
+                 }
+             }
+         }
+     for (int i=0;i<size;i++)
+        {
+            if(massiv[i+1]){
+            massiv[i]->next=massiv[i+1];
+            }
+            else {
+                massiv[i]->next=NULL;
+            }
+        }
+     data->data=massiv[0];
+     delete [] massiv;
+     return data;
+}
+
+void createBase (Catalogue *firstInCatalogue)
+{
+Girl *newData = new Girl;
+       
+       char text[100];
+       strcpy(text,"Анна");
+           newData->name=text;
+         strcpy(text,"Моторная");
+           newData->lastName=text;
+          newData->age=20;
+            
+               firstInCatalogue->data=newData;
+               firstInCatalogue->data->numberInCatalogue=1;
+           
+       Girl *newData2 = new Girl;
+       newData->next=newData2;
+       strcpy(text,"Катя");
+                  newData2->name=text;
+                strcpy(text,"Петрова");
+                  newData2->lastName=text;
+                 newData2->age=21;
+       newData2->numberInCatalogue=2;
+       
+       Girl *newData3 = new Girl;
+              newData2->next=newData3;
+              strcpy(text,"Нина");
+                         newData3->name=text;
+                       strcpy(text,"Иванова");
+                         newData3->lastName=text;
+                        newData3->age=27;
+              newData3->numberInCatalogue=3;
+       
+       Girl *newData4 = new Girl;
+                   newData3->next=newData4;
+                   strcpy(text,"Света");
+                              newData4->name=text;
+                            strcpy(text,"Кондрашова");
+                              newData4->lastName=text;
+                             newData4->age=27;
+                   newData4->numberInCatalogue=4;
+}
+
+int main()
+    {
+        setlocale (LC_ALL,"rus");
+      srand((unsigned)time(NULL));
+        int n=1;
+        Catalogue *firstInCatalogue = new Catalogue;
+        registrationOfEntrance();
+       
+  // Меню пользователя
+while (n>0&& n<14){
+    cout << endl<<"------------   УЧАСТНИЦЫ КОНКУРСА КРАСОТЫ   -----------"<<endl<<
+"1 - Добавить учасницу"<<endl<<
+"2 - Обзор каталога"<<endl<<
+"3 - Поиск участницы по имени"<<endl<<
+"4 - Поиск учасницы по фамилии"<<endl<<
+"5 - Поиск по дате рождения"<<endl<<
+"6 - Удаление учасницы из каталога"<<endl<<
+"7 - Редактировать карточку конкурсантки"<<endl<<
+"8 - Сохранить в файл"<<endl<<
+"9 - Очистить каталог"<<endl<<
+"10 - Сортировка по дате рождения"<<endl<<
+"11 - Сортировка по алфавиту (фамилия)"<<endl<<
+"12 - Генерация случайной победительницы конкурса"<<endl<<
+"13 - Загрузить каталог из файла"<<endl<<
+"0 - Выход\nВыберите действие: ";
+cin.clear();
+cin.ignore(cin.rdbuf()->in_avail());
+cin >> n;
+    while(!isCorrectNumber(n)){
+        cin.clear();
+        clearBuffer();
+        cout<<"Повторите: "<<endl;
+        cin >> n;
+    }
+                switch (n)
+                {
+                case 1: {
+                      cout<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl;
+                    firstInCatalogue->data= AddElem(firstInCatalogue);
+              break;
+                }
+                case 2: {
+                    cout<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl;
+                    showCatalogue(firstInCatalogue->data);
+                    cout<<"ИТОГО: "<<count(firstInCatalogue->data)<<" -число участниц"<<endl;
+                break; }
+                    case 3: {
+                        cout<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl;
+                        findElemByName(firstInCatalogue->data);
+                        break;
+                    }
+                        case 4: {
+                            cout<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl;
+                            findElemByLastName(firstInCatalogue->data);
+                            break;
+                        }
+                        case 5: {
+                            cout<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl;
+                            findElemByAge(firstInCatalogue->data);
+                            break;
+                        }
+                    case 6: {
+                        cout<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl;
+                       firstInCatalogue->data= deleteGirl(firstInCatalogue->data, firstInCatalogue);
+                        changeNumberInCatalogue(firstInCatalogue->data);
+                          showCatalogue(firstInCatalogue->data);
+                        break;}
+                    case 7: {
+                        cout<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl;
+                        changeData(firstInCatalogue->data);
+                        showCatalogue(firstInCatalogue->data);
+                        break;
+                    }
+                    case 8: {
+                        cout<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl;
+                        saveInFile(firstInCatalogue->data);
+                        break;
+                    }
+                    case 9:{
+                        cout<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl;
+                        clearCatalogue(firstInCatalogue->data, firstInCatalogue);
+                        cout<<"-----------список пуст-------------"<<endl;
+                                    showCatalogue(firstInCatalogue->data);
+                        break;
+                    }
+                    case 10: {
+                        cout<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl;
+                      sortByAge(firstInCatalogue->data,firstInCatalogue);
+                        changeNumberInCatalogue(firstInCatalogue->data);
+                        cout<<"-------------------------------------"<<endl<<
+                        "            Отсортировано              "<<endl<<
+                        "---------------------------------------"<<endl;
+                        showCatalogue(firstInCatalogue->data);
+                        break;
+                    }
+                        case 11: {
+                            cout<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl;
+                           sortByLastName(firstInCatalogue->data,firstInCatalogue);
+                            changeNumberInCatalogue(firstInCatalogue->data);
+                            cout<<"-------------------------------------"<<endl<<
+                            "            Отсортировано              "<<endl<<
+                            "---------------------------------------"<<endl;
+                            showCatalogue(firstInCatalogue->data);
+                            break;
+                        }
+                        case 12: {
+                            cout<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl;
+                            cout<<"!!!>>>>> And the winner is "<<randWinner(firstInCatalogue->data)->name<<endl;
+                                               break;
+                                           }
+                    case 13:{
+                        cout<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl;
+                        firstInCatalogue->data = downloadFromFile(firstInCatalogue->data,firstInCatalogue);
+                        showCatalogue(firstInCatalogue->data);
+                        break;
+                    }
+                }
+}
+        delete firstInCatalogue;
+return 0;
+}
+
