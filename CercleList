@@ -1,0 +1,255 @@
+
+// С++
+//Реализовать структуры данных «линейный список» и «циклический список».
+// 1) Добавление/удаление элемента в список (с клавиатуры);
+// 2) Вывод исходного и результирующего списков на экран;
+// 3) Если списки являются многочленами, в выводе должна быть
+// отражена степень каждого элемента.
+
+// Многочлен P(x)=anxn + an-1xn-1 +...+ a1x + a0 с целыми коэффициентами можно представить в виде циклического односвязного списка, 
+// причем если ai=0, то соответствующее звено не включать в список. Определить логическую функцию Equal(p, q), проверяющие на 
+//равенство многочлены p и q
+
+//
+//  main.cpp
+//  struct2
+//
+//  Created by Анна Моторная on 28.09.2020.
+//  Copyright © 2020 Анна Моторная. All rights reserved.
+//
+
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#ifdef _DEBUG
+#ifndef DBG_NEW
+#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+#define newDBG_NEW
+#endif
+#endif
+
+#include <iostream>
+#include <ctime>
+#include <cmath>
+#include <iomanip>
+#include <cstdlib>
+ 
+    using namespace std;
+ 
+struct list {
+  int field;
+  list *next;
+};
+list *head;
+list *head2;
+
+struct list *add_element(list *q,int n, list *head)//
+//добавление элемента (и создание, если список пуст)
+{
+    list *temp=q;
+    
+    for (int i = 0; i < n-1; i++)
+    {
+        if (q->next==NULL)
+        {
+            cout<<"Введите head элемент: ";
+                    if (cin.fail())
+                 {
+                 cin.clear();
+                   cin.ignore(32767, '\n');
+                   cin.ignore(cin.rdbuf()->in_avail(), '\n');
+                     return 0;
+                 }
+            cin>>head->field;
+            temp=head;
+        }
+ list *box = new list;
+        if (head->next==NULL)
+               {
+                   head->next=box;
+               }
+        temp->next=box;
+        cout<<"Введите элемент: ";
+        if (cin.fail())
+        {
+        cin.clear();
+          cin.ignore(32767, '\n');
+          cin.ignore(cin.rdbuf()->in_avail(), '\n');
+            cout<<"error"<<endl;
+            return 0;
+        }
+        cin>>box->field;
+        box->next=head;
+    temp=box;
+        q=box;
+     }
+    return q;
+}
+void listprint(list *q)//вывод элементов списка
+{
+    list *temp=q;
+    temp=temp->next;
+    while(temp!=q)
+        {
+          printf("%d ", temp->field);
+            temp=temp->next;
+        }
+    printf("%d ", q->field);
+    cout<<endl;
+}
+
+struct list *check_0_and_delete(list *q)//поиск 0 и удаление
+//элемента с нулевым значением
+{
+    list *temp=q;
+    if (temp->field==0)
+               {
+                   list *delet=temp;
+                   while (temp->next!=delet)
+                      {
+                          temp=temp->next;
+                      }
+                   temp->next=delet->next;
+                   delete [] delet;
+    }
+    else{temp=temp->next;}
+    while(temp!=q)
+{
+    if (temp->field==0)
+               {
+                   list *delet=temp;
+                   while (temp->next!=delet)
+                      {
+                          temp=temp->next;
+                      }
+                   temp->next=delet->next;
+                   delete [] delet;
+    }
+    temp=temp->next;
+}
+    q=temp;
+    return q;
+}
+struct list *check_0(list *q)//поиск элемента в списке
+{
+    list *temp=q;
+        if (temp->field==0)
+                   {
+                       return q;
+        }
+        else{temp=temp->next;}
+        while(temp!=q)
+    {
+        if (temp->field==0)
+                   {
+                       return q;
+        }
+        temp=temp->next;
+    }
+        q=temp;
+        return q;
+}
+struct list *delete_elem(list *temp)//удаление элемента по указателю
+{
+                   list *delet=temp;
+                   while (temp->next!=delet)
+                      {
+                          temp=temp->next;
+                      }
+                   temp->next=delet->next;
+    temp=temp->next;
+                   delete [] delet;
+    return temp;
+}
+struct list *delet(list *q)//удаление списка
+{
+    list *temp=q;
+    temp=temp->next;
+    while(temp!=q)
+    {
+        list *delet=temp;
+            temp=temp->next;
+        delete delet;
+        }
+    return q;
+}
+int count (list *q)//счетчик количества элементов
+{
+    int n=1;
+    list *temp=q;
+    temp=temp->next;
+    while(temp!=q)
+        {
+            n++;
+            temp=temp->next;
+        }
+    return n;
+}
+bool Equal (list *a, list *b)//проверка на равенство двух списков,
+//порядок с условных первых элементов)
+{
+   if (a->field==b->field)
+            {
+                a=a->next;
+                b=b->next;
+            }
+            else{return false;}
+    return true;
+}
+int main()
+{
+    srand((unsigned)time(NULL));
+    setlocale(LC_ALL, "rus");
+    int n;
+    cout<<"Введите количество элементов: "<<endl;
+    cin>>n;
+    head = new list;
+    head->next=NULL;
+
+    list *temp=head;
+    temp=add_element(temp,n,head);
+    listprint(temp);
+    
+    //просто проработка отдельных функций
+    //list *delet=temp->next;
+    //if (temp->field==0){temp=delete_elem(temp);}
+    //while (delet!=temp)
+    //{
+        //list *check=delet;
+        //check=check_0(check);
+        //if (check->field==0)
+        //{
+            //delet=delete_elem(check);
+        //}
+        //delet=delet->next;
+    //}
+    
+    temp=check_0_and_delete(temp);
+    cout<<"Cписок P-многочлена с удаленными 0-ми: "<<endl;
+    listprint(temp);
+    
+    n=count(temp);
+
+    head2=new list;
+    head2->next=NULL;
+    
+    cout<<"Введите второй список Q, размером в "<<n<<" элемента"<<endl;
+    list *temp2=head2;
+    temp2=add_element(temp2,n,head2);
+    cout<<endl<<"Коэффициенты многочлена Q:"<<endl;
+    listprint(temp2);
+    cout<<"Проверка на равенство: "<<endl;
+    bool l=false;
+    l=Equal(head,head2);
+    if(l==true)
+    {
+        cout<<"Равны"<<endl;
+    }
+    else {cout<<"не равны"<<endl;}
+    cout<<endl;
+    temp=delet(temp);
+    delete [] temp;
+    temp2=delet(temp2);
+    delete []temp2;
+    
+    return 0;
+}
